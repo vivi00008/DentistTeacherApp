@@ -1,21 +1,46 @@
-import { StatusBar } from 'expo-status-bar';
-import React from 'react';
-import { StyleSheet, Text, View } from 'react-native';
+import React, { useState, useContext} from "react"
+import * as Font from "expo-font"
+import AppLoading from "expo-app-loading"
+import { UserContext, UserProvider } from "./src/context/UserContext"
+import LoginScreen from "./src/screens/LoginScreen"
+import MainApp from "./src"
 
-export default function App() {
-  return (
-    <View style={styles.container}>
-      <Text>Open up App.js to start working on your app!</Text>
-      <StatusBar style="auto" />
-    </View>
-  );
+const Render = () => {
+    const user = useContext(UserContext)
+    return (
+        <React.Fragment>
+            {user?.isAuth ? <MainApp /> : <LoginScreen />}
+        </React.Fragment>
+    )
 }
 
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: '#fff',
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-});
+function App() {
+    const [fontsLoad, setFontsLoad] = useState(false)
+
+    async function getFonts(){
+      await Font.loadAsync({
+          'kanitRegular': require("./assets/fonts/Kanit-Regular.ttf"),
+          'kanitBold': require('./assets/fonts/Kanit-Bold.ttf'),
+          'kanitSemiBold':require('./assets/fonts/Kanit-SemiBold.ttf')
+      })
+      setFontsLoad(true)
+  }
+
+    if (fontsLoad) {
+        return (
+            <UserProvider>
+                <Render />
+            </UserProvider>
+        )
+    } else {
+        return (
+            <AppLoading
+                startAsync={getFonts}
+                onFinish={() => setFontsLoad(true)}
+                onError={console.warn}
+            />
+        )
+    }
+}
+
+export default App
