@@ -43,10 +43,11 @@ const LoginScreen = () => {
                     },
                 }
             );
+            
             if(response.data.success){
-                console.log(response.data)
                 user.setUser(response.data)
                 user.setIsAuth(true)
+                user.setToken(response.data.token)
             }
         } catch (err) {
             console.log(err);
