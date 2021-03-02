@@ -10,14 +10,15 @@ import { ScrollView } from "react-native-gesture-handler";
 const RentScreen = () => {
     const [cartData, setCartData] = useState([]);
     const [isLoading, setIsLoading] = useState(false);
+    const [confirm, setConfirm] = useState(false);
     const user = useContext(UserContext);
 
     const getCartData = async () => {
         setIsLoading(false);
         const response = await cartApi.get("/teacher", {
             headers: {
-                Authorization: user.token
-            }
+                Authorization: user.token,
+            },
         });
         if (response.data.success) {
             console.log(response.data.message);
@@ -28,9 +29,10 @@ const RentScreen = () => {
 
     useEffect(() => {
         getCartData();
-    }, []);
+        setConfirm(false);
+    }, [confirm]);
 
-    return isLoading ? (
+    return (
         <ImageBackground
             source={require("../../assets/picture/mainBg.png")}
             style={styles.root}
@@ -50,20 +52,30 @@ const RentScreen = () => {
                 <View style={styles.container}>
                     <View style={styles.rentContent}>
                         <ScrollView>
-                            {cartData.map((e) => {
-                                const date = new Date(e.session_docs.end);
-                                return (
-                                    <CartCard
-                                        date={date.toLocaleDateString()}
-                                    />
-                                );
-                            })}
+                            {isLoading
+                                ? cartData.map((e) => {
+                                      const date = new Date(e.session_docs.end);
+                                      return (
+                                          <CartCard
+                                              key={e._id}
+                                              date={date}
+                                              name={e.user_docs.name}
+                                              id={e.user_docs.username}
+                                              roomType={e.floor_docs.name}
+                                              time={e.session_docs.sessionInDay}
+                                              seat={e.reservation.seats}
+                                              cartId={e.id}
+                                              isConfirm={() => setConfirm(true)}
+                                          />
+                                      );
+                                  })
+                                : null}
                         </ScrollView>
                     </View>
                 </View>
             </View>
         </ImageBackground>
-    ) : null;
+    );
 };
 
 export default RentScreen;
