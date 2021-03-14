@@ -1,5 +1,11 @@
-import React, { useEffect, useState, useContext } from "react";
-import { View, Text, SafeAreaView, ImageBackground } from "react-native";
+import React, { useEffect, useState, useContext, useCallback } from "react";
+import {
+    View,
+    Text,
+    SafeAreaView,
+    ImageBackground,
+    RefreshControl,
+} from "react-native";
 import { Avatar } from "react-native-paper";
 import styles from "../Styles";
 import cartApi from "../api/cartApi";
@@ -11,17 +17,26 @@ const RentScreen = () => {
     const [cartData, setCartData] = useState([]);
     const [isLoading, setIsLoading] = useState(false);
     const [confirm, setConfirm] = useState(false);
+    const [refreshing, setRefreshing] = useState(false);
     const user = useContext(UserContext);
+
+    const onRefresh = useCallback(() => {
+        setRefreshing(true);
+        wait(1000).then(() => setRefreshing(false));
+    }, []);
+
+    const wait = (timeout) => {
+        return new Promise(resolve => setTimeout(resolve, timeout));
+      }
 
     const getCartData = async () => {
         setIsLoading(false);
-        const response = await cartApi.get("/teacher", {
+        const response = await cartApi.get("/teacher/waiting", {
             headers: {
                 Authorization: user.token,
             },
         });
         if (response.data.success) {
-            console.log(response.data.message);
             setCartData(response.data.message);
             setIsLoading(true);
         }
@@ -30,7 +45,7 @@ const RentScreen = () => {
     useEffect(() => {
         getCartData();
         setConfirm(false);
-    }, [confirm]);
+    }, [confirm, refreshing]);
 
     return (
         <ImageBackground
@@ -42,16 +57,19 @@ const RentScreen = () => {
                     คุณเช็คคำร้อง{"\n"}จองห้องหรือยัง?
                 </Text>
             </SafeAreaView>
-
             <View style={styles.contentBg}>
-                <Avatar.Image
-                    size={108}
-                    source={require("../../assets/picture/dental-care.png")}
-                    style={styles.iconContent}
-                />
-                <View style={styles.container}>
-                    <View style={styles.rentContent}>
-                        <ScrollView>
+                <ScrollView
+                    showsVerticalScrollIndicator={false}
+                    refreshControl={
+                        <RefreshControl
+                            refreshing={refreshing}
+                            onRefresh={onRefresh}
+                        />
+                    }
+                >
+                    <View style={styles.container}>
+                        <View style={styles.rentContent}>
+                            {cartData.length == 0 ?(<Text style={{textAlign:'center', fontFamily:"kanitRegular", fontSize:24, marginTop:20}}>ไม่พบข้อมูลการจอง</Text>) : null}
                             {isLoading
                                 ? cartData.map((e) => {
                                       const date = new Date(e.session_docs.end);
@@ -65,14 +83,15 @@ const RentScreen = () => {
                                               time={e.session_docs.sessionInDay}
                                               seat={e.reservation.seats}
                                               cartId={e.id}
+                                              showButton={true}
                                               isConfirm={() => setConfirm(true)}
                                           />
                                       );
                                   })
                                 : null}
-                        </ScrollView>
+                        </View>
                     </View>
-                </View>
+                </ScrollView>
             </View>
         </ImageBackground>
     );

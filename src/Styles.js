@@ -73,6 +73,42 @@ export default StyleSheet.create({
         color: "white",
     },
     rentContent:{
-        marginTop:HEIGHT/10
-    }
+        marginTop:10
+    },
+    profileAvatar:{
+        backgroundColor: "#f5a81e",
+        alignSelf:'center'
+    },
+    nameText: {
+        fontFamily: "kanitRegular",
+        fontSize: 24,
+    },
+    profileName:{
+        alignItems:'center',
+        marginTop:10
+    },
+    rowView: {
+        flexDirection: "row",
+        marginVertical: 30,
+        alignItems: "center",
+        alignSelf: "center",
+    },
+    viewDetails: {
+        backgroundColor: "#f4e7f4",
+        padding: 8,
+        width: WIDTH / 8,
+        height: HEIGHT / 18,
+    },
+    textDetail: {
+        fontFamily: "kanitRegular",
+        fontSize: 14,
+        marginLeft: 18,
+    },
+    dentalChair: {
+        width: WIDTH / 15,
+        height: HEIGHT / 30,
+        alignSelf: "center",
+        justifyContent: "center",
+    },
+
 })

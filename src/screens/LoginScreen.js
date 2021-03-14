@@ -7,6 +7,8 @@ import {
     Dimensions,
     SafeAreaView,
     TouchableOpacity,
+    Alert,
+    ActivityIndicator
 } from "react-native";
 import { TextInput } from "react-native-paper";
 import FeatherIcon from "react-native-vector-icons/Feather";
@@ -18,18 +20,32 @@ const WIDTH = Dimensions.get("window").width;
 const LoginScreen = () => {
     const [username, setUsername] = useState("");
     const [password, setPassword] = useState("");
+    const [errMsgUser, setErrMsgUser] = useState("")
+    const [errMsgPass, setErrMsgPass] = useState("")
+    const [showAct, setShowAct] = useState(false)
 
-    const user = useContext(UserContext)
+    const user = useContext(UserContext);
 
     const handleUsername = useCallback((value) => {
+        if(value.length <= 0){
+            setErrMsgUser("Username is require.")
+        }else{
+            setErrMsgUser("")
+        }
         setUsername(value);
     }, []);
 
     const handlePassword = useCallback((value) => {
+        if(value.length < 8){
+            setErrMsgPass("Password not empty or less than 8 character.")
+        }else{
+            setErrMsgPass("")
+        }
         setPassword(value);
     }, []);
 
     const doLogin = async () => {
+        setShowAct(true)
         try {
             const response = await userApi.post(
                 "/login-professor",
@@ -41,22 +57,33 @@ const LoginScreen = () => {
                     headers: {
                         "content-type": "application/json",
                     },
-                }
+                },
             );
-            
-            if(response.data.success){
-                console.log(response.data.token)
-                user.setUser(response.data)
-                user.setToken(response.data.token)
-                user.setIsAuth(true)
+
+            if (response.data.success) {
+                user.setUser(response.data);
+                user.setToken(response.data.token);
+                user.setIsAuth(true);
+
+            } else {
+                showAlter("ชื่อผู้ใช้งานหรือรหัสผ่านไม่ถูกต้อง")
             }
         } catch (err) {
-            console.log(err);
+            showAlter("เกิดข้อผิดพลาดที่เซิฟเวอร์")
         }
+        setShowAct(false)
     };
+
+    const showAlter = (details) =>{
+        Alert.alert(
+            "เกิดข้อผิดพลาด",
+            details
+        )
+    }
 
     return (
         <SafeAreaView style={styles.root}>
+            <ActivityIndicator animating={showAct} style={styles.loadingIndicator} size="large" color="black"/>
             <View style={styles.container}>
                 <Image
                     source={require("../../assets/picture/dentistLogo.png")}
@@ -83,6 +110,7 @@ const LoginScreen = () => {
                     }}
                     focusable={true}
                 />
+                <Text style={styles.textErr}>{errMsgUser}</Text>
                 <TextInput
                     label="รหัสผ่าน"
                     mode="outlined"
@@ -95,6 +123,7 @@ const LoginScreen = () => {
                     }}
                     secureTextEntry={true}
                 />
+                <Text style={styles.textErr}>{errMsgPass}</Text>
                 <TouchableOpacity style={styles.loginButton} onPress={doLogin}>
                     <Text style={styles.textButton}>เข้าสู่ระบบ</Text>
                     <FeatherIcon
@@ -191,6 +220,14 @@ const styles = StyleSheet.create({
         alignSelf: "center",
         marginVertical: 12,
     },
+    textErr:{
+        color:'red',
+        marginHorizontal:15,
+        fontSize:12
+    },
+    loadingIndicator:{
+        flex:1, position:"absolute", left:0, right:0,top:0, bottom:0
+    }
 });
 
 export default LoginScreen;

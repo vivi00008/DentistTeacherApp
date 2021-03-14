@@ -22,7 +22,8 @@ const CartCard = ({
     time,
     state,
     cartId,
-    isConfirm
+    isConfirm,
+    showButton
 }) => {
     const [visible, setVisible] = useState(false);
     const [textDialog, setTextDialog] = useState("");
@@ -149,7 +150,7 @@ const CartCard = ({
                     <Text style={styles.textDetail}>{seat}</Text>
                 </View>
             </Card.Content>
-            <View
+            {showButton ? (<View
                 style={[
                     styles.row,
                     { justifyContent: "space-around", marginVertical: 10 },
@@ -181,7 +182,8 @@ const CartCard = ({
                         อนุมัติ
                     </Text>
                 </TouchableOpacity>
-            </View>
+            </View>):null}
+            
 
             <Portal>
                 <Dialog visible={visible} onDismiss={hideDialog}>
@@ -229,6 +231,7 @@ const styles = StyleSheet.create({
     card: {
         borderColor: "#e8e8e8",
         borderWidth: 1,
+        marginVertical:12
     },
     textHeaderCard: {
         fontFamily: "kanitRegular",

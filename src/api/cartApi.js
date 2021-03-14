@@ -1,5 +1,5 @@
 import axios from 'axios'
 
 export default axios.create({
-    baseURL:"http://192.168.1.37:8080/api/cart"
+    baseURL:"https://ancient-tor-76648.herokuapp.com/api/cart"
 })
