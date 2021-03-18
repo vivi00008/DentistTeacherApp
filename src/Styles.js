@@ -110,5 +110,12 @@ export default StyleSheet.create({
         alignSelf: "center",
         justifyContent: "center",
     },
-
+    loadingIndicator:{
+        flex:1,
+        position:'absolute',
+        left:0,
+        right:0,
+        top:0,
+        bottom:0
+    }
 })

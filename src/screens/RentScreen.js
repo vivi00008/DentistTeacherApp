@@ -5,8 +5,9 @@ import {
     SafeAreaView,
     ImageBackground,
     RefreshControl,
+    ActivityIndicator,
+    Alert
 } from "react-native";
-import { Avatar } from "react-native-paper";
 import styles from "../Styles";
 import cartApi from "../api/cartApi";
 import { UserContext } from "../context/UserContext";
@@ -31,21 +32,35 @@ const RentScreen = () => {
 
     const getCartData = async () => {
         setIsLoading(false);
-        const response = await cartApi.get("/teacher/waiting", {
-            headers: {
-                Authorization: user.token,
-            },
-        });
-        if (response.data.success) {
-            setCartData(response.data.message);
-            setIsLoading(true);
+        try {
+            const response = await cartApi.get("/teacher/waiting", {
+                headers: {
+                    Authorization: user.token,
+                },
+            });
+            if (response.data.success) {
+                setCartData(response.data.message);
+            }else{
+                showAlter(response.data.message)
+            }
+            
+        } catch (err) {
+            showAlter(err)
         }
+        setIsLoading(true);
     };
 
     useEffect(() => {
         getCartData();
         setConfirm(false);
     }, [confirm, refreshing]);
+
+    const showAlter = (text) => {
+        Alert.alert(
+            "เกิดข้อผิดพลาด",
+            text
+        )
+    }
 
     return (
         <ImageBackground
@@ -69,7 +84,7 @@ const RentScreen = () => {
                 >
                     <View style={styles.container}>
                         <View style={styles.rentContent}>
-                            {cartData.length == 0 ?(<Text style={{textAlign:'center', fontFamily:"kanitRegular", fontSize:24, marginTop:20}}>ไม่พบข้อมูลการจอง</Text>) : null}
+                            {cartData.length == 0 && isLoading ?(<Text style={{textAlign:'center', fontFamily:"kanitRegular", fontSize:24, marginTop:20}}>ไม่พบข้อมูลการจอง</Text>) : null}
                             {isLoading
                                 ? cartData.map((e) => {
                                       const date = new Date(e.session_docs.end);
@@ -88,7 +103,7 @@ const RentScreen = () => {
                                           />
                                       );
                                   })
-                                : null}
+                                : <ActivityIndicator size="large" style={styles.loadingIndicator}/>}
                         </View>
                     </View>
                 </ScrollView>
